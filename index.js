@@ -6,7 +6,7 @@ const crypto = require('crypto');
 
 function encrypt(obj, data) {
     let cipher;
-    if (obj.iv === null || obj.iv === undefined) {
+    if (obj.iv === false) {
         cipher = crypto.createCipher(obj.cipher, obj.key);
     } else {
         cipher = crypto.createCipheriv(obj.cipher, obj.key, obj.iv);
@@ -18,7 +18,7 @@ function encrypt(obj, data) {
 
 function decrypt(obj, data) {
     let decipher;
-    if (obj.iv === null || obj.iv === undefined) {
+    if (obj.iv === false) {
         decipher = crypto.createDecipher(obj.cipher, obj.key);
     } else {
         decipher = crypto.createDecipheriv(obj.cipher, obj.key, obj.iv);
@@ -51,7 +51,7 @@ module.exports = class Stamp {
         this.key = key || crypto.randomBytes(32);
         this.cipher = cipher || 'aes256';
         this.hash = hash || 'sha512';
-        this.iv = iv;
+        this.iv = iv || false;
     }
 
     generateToken(duration, data) {
@@ -73,13 +73,9 @@ module.exports = class Stamp {
 
     // Checks if the given unknown token is valid, looking for the max timestamp set in it
     verifyToken(unknownToken) {
-        let decrypted;
-        if (obj.iv === null || obj.iv === undefined) {
-            decrypted = decrypt(this.cipher, this.key, unknownToken);
-        } else {
-            decrypted = decrypt(this.cipher, this.key, this.iv, unknownToken);
-        }
+        const decrypted = decrypt(this, unknownToken);
         const payload = JSON.parse(decrypted);
+        // Only parses valid payloads as a security measure
         if (payload.maxTimestamp >= Date.now()) {
             return true;
         } else {
