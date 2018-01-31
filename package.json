@@ -4,7 +4,7 @@
   "description": "Encrypt JSON data into temporary tokens for untrusted environments.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test/basic.js"
   },
   "repository": {
     "type": "git",
